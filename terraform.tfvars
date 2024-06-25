@@ -1,8 +1,8 @@
 ami_id                 = "ami-0c0e147c706360bd7"
 key_name               = "stockholm"
 subnet_id              = "subnet-090ef90d08a591561"
-security_groups_master = "master-sec-gr"
-security_groups_worker = "worker-sec-gr"
+security_groups_master = "master-sec-group"
+security_groups_worker = ["worker-sec-group"]
 tags_master = {
   Name        = "Master"
   Environment = "kubernetes-cluster-dev"

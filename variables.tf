@@ -21,24 +21,32 @@ variable "key_name" {
   type    = string
 }
 variable "tags_master" {
-  description = "owner"
+  description = "Tags for the master instance"
   type        = map(string)
   default = {
-    "name" = "Key-name-owner"
+    "Name"        = "Master"
+    "Environment" = "kubernetes-cluster-dev"
   }
 }
 variable "tags_worker" {
-  description = "owner"
+  description = "Tags for the worker instances"
   type        = map(string)
   default = {
-    "name" = "Key-name-owner"
+    "Name"        = "Worker"
+    "Environment" = "kubernetes-cluster-dev"
   }
 }
 variable "security_groups_master" {
-  description = "master-sec-gr"
+  description = "Security groups for master"
+  type        = string
+}
+variable "security_group_name" {
+  description = "Ec2-Sec-Gr"
+  type        = string
 }
 variable "security_groups_worker" {
-  description = "worker-sec-gr"
+  description = "Security groups for worker"
+  type        = list(string)
 }
 variable "master_ports" {
   description = "List of ports open"

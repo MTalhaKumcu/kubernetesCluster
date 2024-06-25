@@ -2,13 +2,13 @@ provider "aws" {
   region = var.region
 }
 resource "aws_instance" "Master" {
-  ami             = var.ami_id
-  instance_type   = var.instance_type
-  subnet_id       = var.subnet_id
-  security_groups = var.security_groups_master
-  user_data       = templatefile("${path.module}/master.sh", {})
-  key_name        = var.key_name
-  tags            = var.tags_master
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = [aws_security_group.master-sec-group.id]
+  user_data              = templatefile("${path.module}/master.sh", {})
+  key_name               = var.key_name
+  tags                   = var.tags_master
   root_block_device {
     volume_size = 20
     volume_type = "gp2"
@@ -16,29 +16,27 @@ resource "aws_instance" "Master" {
 }
 
 resource "aws_instance" "Worker" {
-  count           = 2
-  ami             = var.ami_id
-  instance_type   = var.instance_type
-  subnet_id       = var.subnet_id
-  security_groups = var.security_groups_worker
-  user_data       = templatefile("${path.module}/worker.sh", {})
-  key_name        = var.key_name
-  tags            = var.tags_worker
+  count                  = 2
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = [aws_security_group.worker-sec-group.id]
+  user_data              = templatefile("${path.module}/worker.sh", {})
+  key_name               = var.key_name
+  tags                   = var.tags_worker
   root_block_device {
     volume_size = 20
     volume_type = "gp2"
   }
 }
-
 data "aws_vpc" "default" {
   default = true
 }
-
-resource "aws_security_group" "master-sec-gr" {
+resource "aws_security_group" "master-sec-group" {
   name        = var.security_groups_master
-  description = "master-sec-gr"
+  description = "Security group for master node"
   vpc_id      = data.aws_vpc.default.id
-  tags        = var.security_groups_master
+  tags        = var.tags_master
   dynamic "ingress" {
     for_each = var.master_ports
     content {
@@ -57,7 +55,6 @@ resource "aws_security_group" "master-sec-gr" {
       cidr_blocks = ingress.value.cidr_blocks
     }
   }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -65,11 +62,11 @@ resource "aws_security_group" "master-sec-gr" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-resource "aws_security_group" "worker-sec-gr" {
-  name        = var.security_groups_worker
-  description = "worker-sec-gr"
+resource "aws_security_group" "worker-sec-group" {
+  name        = "worker-sec-group"
+  description = "Security group for worker nodes"
   vpc_id      = data.aws_vpc.default.id
-  tags        = var.security_groups_worker
+  tags        = var.tags_worker
   dynamic "ingress" {
     for_each = var.worker_ports
     content {
@@ -88,7 +85,6 @@ resource "aws_security_group" "worker-sec-gr" {
       cidr_blocks = ingress.value.cidr_blocks
     }
   }
-
   egress {
     from_port   = 0
     to_port     = 0
