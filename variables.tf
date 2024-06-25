@@ -6,7 +6,7 @@ variable "region" {
 variable "instance_type" {
   description = "ec2-t3.micro"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.small"
 }
 variable "ami_id" {
   default = "amazon-linux2"
