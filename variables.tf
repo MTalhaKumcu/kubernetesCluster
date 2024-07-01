@@ -12,10 +12,6 @@ variable "ami_id" {
   default = "amazon-linux2"
   type    = string
 }
-variable "subnet_id" {
-  description = "subnets"
-  type        = string
-}
 variable "key_name" {
   default = "Key-name"
   type    = string

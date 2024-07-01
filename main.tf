@@ -2,13 +2,14 @@ provider "aws" {
   region = var.region
 }
 resource "aws_instance" "Master" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.subnet-1a.id
-  vpc_security_group_ids = [aws_security_group.master-sec-group.id]
-  user_data              = templatefile("${path.module}/master.sh", {})
-  key_name               = var.key_name
-  tags                   = var.tags_master
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.subnet-1a.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.master-sec-group.id]
+  user_data                   = templatefile("${path.module}/master.sh", {})
+  key_name                    = var.key_name
+  tags                        = var.tags_master
   root_block_device {
     volume_size = 20
     volume_type = "gp2"
@@ -18,7 +19,7 @@ resource "aws_instance" "Worker" {
   count                  = 2
   ami                    = var.ami_id
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.subnet-1b.id
+  subnet_id              = aws_subnet.subnet-1a.id
   vpc_security_group_ids = [aws_security_group.worker-sec-group.id]
   user_data              = templatefile("${path.module}/worker.sh", {})
   key_name               = var.key_name
@@ -93,14 +94,16 @@ resource "aws_vpc" "main" {
   tags       = var.vpc_tags
 }
 resource "aws_subnet" "subnet-1a" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = var.subnet_cidrs[0]
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.subnet_cidrs[0]
+  map_public_ip_on_launch = true
 
   tags = var.vpc_tags
 }
 resource "aws_subnet" "subnet-1b" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = var.subnet_cidrs[1]
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.subnet_cidrs[1]
+  map_public_ip_on_launch = true
 
   tags = var.vpc_tags
 }
@@ -125,3 +128,4 @@ resource "aws_route_table_association" "b" {
   subnet_id      = aws_subnet.subnet-1b.id
   route_table_id = aws_route_table.rt.id
 }
+

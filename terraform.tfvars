@@ -2,6 +2,8 @@ ami_id                 = "ami-0c0e147c706360bd7"
 key_name               = "stockholm"
 security_groups_master = "master-sec-group"
 security_groups_worker = ["worker-sec-group"]
+vpc_cidr               = "10.0.0.0/16"
+subnet_cidrs           = ["10.0.1.0/24", "10.0.2.0/24"]
 tags_master = {
   Name        = "Master"
   Environment = "kubernetes-cluster-dev"
@@ -78,8 +80,6 @@ ssh_ports = [
     cidr_blocks = ["0.0.0.0/0"]
   }
 ]
-vpc_cidr = "10.0.0.0/16"
-subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
 vpc_tags = {
   Name = "custom_vpc"
 }
