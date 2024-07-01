@@ -4,7 +4,7 @@ provider "aws" {
 resource "aws_instance" "Master" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
-  subnet_id              = var.subnet_id
+  subnet_id              = aws_subnet.subnet-1a.id
   vpc_security_group_ids = [aws_security_group.master-sec-group.id]
   user_data              = templatefile("${path.module}/master.sh", {})
   key_name               = var.key_name
@@ -14,12 +14,11 @@ resource "aws_instance" "Master" {
     volume_type = "gp2"
   }
 }
-
 resource "aws_instance" "Worker" {
   count                  = 2
   ami                    = var.ami_id
   instance_type          = var.instance_type
-  subnet_id              = var.subnet_id
+  subnet_id              = aws_subnet.subnet-1b.id
   vpc_security_group_ids = [aws_security_group.worker-sec-group.id]
   user_data              = templatefile("${path.module}/worker.sh", {})
   key_name               = var.key_name
@@ -29,13 +28,10 @@ resource "aws_instance" "Worker" {
     volume_type = "gp2"
   }
 }
-data "aws_vpc" "default" {
-  default = true
-}
 resource "aws_security_group" "master-sec-group" {
   name        = var.security_groups_master
   description = "Security group for master node"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
   tags        = var.tags_master
   dynamic "ingress" {
     for_each = var.master_ports
@@ -65,7 +61,7 @@ resource "aws_security_group" "master-sec-group" {
 resource "aws_security_group" "worker-sec-group" {
   name        = "worker-sec-group"
   description = "Security group for worker nodes"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
   tags        = var.tags_worker
   dynamic "ingress" {
     for_each = var.worker_ports
@@ -91,4 +87,41 @@ resource "aws_security_group" "worker-sec-group" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+resource "aws_vpc" "main" {
+  cidr_block = var.vpc_cidr
+  tags       = var.vpc_tags
+}
+resource "aws_subnet" "subnet-1a" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = var.subnet_cidrs[0]
+
+  tags = var.vpc_tags
+}
+resource "aws_subnet" "subnet-1b" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = var.subnet_cidrs[1]
+
+  tags = var.vpc_tags
+}
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+  tags   = var.vpc_tags
+}
+resource "aws_route_table" "rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+  tags = var.vpc_tags
+}
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.subnet-1a.id
+  route_table_id = aws_route_table.rt.id
+}
+resource "aws_route_table_association" "b" {
+  subnet_id      = aws_subnet.subnet-1b.id
+  route_table_id = aws_route_table.rt.id
 }

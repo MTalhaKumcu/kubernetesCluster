@@ -1,6 +1,5 @@
 ami_id                 = "ami-0c0e147c706360bd7"
 key_name               = "stockholm"
-subnet_id              = "subnet-090ef90d08a591561"
 security_groups_master = "master-sec-group"
 security_groups_worker = ["worker-sec-group"]
 tags_master = {
@@ -71,7 +70,6 @@ worker_ports = [
     cidr_blocks = ["0.0.0.0/0"]
   }
 ]
-
 ssh_ports = [
   {
     from_port   = 22
@@ -80,3 +78,8 @@ ssh_ports = [
     cidr_blocks = ["0.0.0.0/0"]
   }
 ]
+vpc_cidr = "10.0.0.0/16"
+subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+vpc_tags = {
+  Name = "custom_vpc"
+}

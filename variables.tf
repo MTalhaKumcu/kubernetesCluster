@@ -6,7 +6,7 @@ variable "region" {
 variable "instance_type" {
   description = "ec2-t3.micro"
   type        = string
-  default     = "t3.small"
+  default     = "t3.micro"
 }
 variable "ami_id" {
   default = "amazon-linux2"
@@ -74,4 +74,21 @@ variable "ssh_ports" {
     protocol    = string
     cidr_blocks = list(string)
   }))
+}
+variable "vpc_cidr" {
+  description = "The CIDR block for the VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+variable "subnet_cidrs" {
+  description = "A list of CIDR blocks for the subnets"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+variable "vpc_tags" {
+  description = "A map of tags to add to all resources"
+  type = map(string)
+  default = {
+    "name" = "main-vpc"
+  }
 }
