@@ -6,7 +6,7 @@ variable "region" {
 variable "instance_type" {
   description = "ec2-t3.micro"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.small"
 }
 variable "ami_id" {
   default = "amazon-linux2"
@@ -83,8 +83,13 @@ variable "subnet_cidrs" {
 }
 variable "vpc_tags" {
   description = "A map of tags to add to all resources"
-  type = map(string)
+  type        = map(string)
   default = {
     "name" = "main-vpc"
   }
 }
+variable "tags_master_role" {
+  description = "master role policy description"
+  type        = string
+}
+

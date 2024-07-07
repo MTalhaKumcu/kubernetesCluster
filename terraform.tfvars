@@ -83,3 +83,4 @@ ssh_ports = [
 vpc_tags = {
   Name = "custom_vpc"
 }
+tags_master_role = "Kubernetes Master Role"

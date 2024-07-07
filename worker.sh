@@ -20,10 +20,11 @@ sudo systemctl enable --now kubelet
 yum repolist
 sudo echo "kubeadm installing" >> /logfile/master.log
 sudo kubeadm init 
-sudo cat /var/log/cloud-init-output.log > /logfile/kubeadmoutput.log
-sudo mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-sudo export KUBECONFIG=/etc/kubernetes/admin.conf
 sudo kubectl get nodes >> /logfile/nodesMaster.log
 watch kubectl get nodes >> /logfile/nodesMaster.log
+sudo rm /etc/kubernetes/kubelet.conf
+sudo rm /etc/kubernetes/pki/ca.crt
+#sudo nano /etc/hosts
+#10.0.1.199   ip-10-0-1-199.eu-north-1.compute.internal
+sudo systemctl stop kubelet
+sudo kill -9 $(sudo lsof -t -i:10250)

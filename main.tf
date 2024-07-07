@@ -14,6 +14,8 @@ resource "aws_instance" "Master" {
     volume_size = 20
     volume_type = "gp2"
   }
+  iam_instance_profile = aws_iam_instance_profile.instance_profile_for_master.name
+
 }
 resource "aws_instance" "Worker" {
   count                  = 2
@@ -52,6 +54,12 @@ resource "aws_security_group" "master-sec-group" {
       cidr_blocks = ingress.value.cidr_blocks
     }
   }
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -81,6 +89,12 @@ resource "aws_security_group" "worker-sec-group" {
       protocol    = ingress.value.protocol
       cidr_blocks = ingress.value.cidr_blocks
     }
+  }
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     from_port   = 0
@@ -128,4 +142,36 @@ resource "aws_route_table_association" "b" {
   subnet_id      = aws_subnet.subnet-1b.id
   route_table_id = aws_route_table.rt.id
 }
+resource "aws_iam_policy" "policy_for_master" {
+  description = "Kubernetes master node policy for managing cluster"
+  name        = "master_policy"
+  policy      = file("./master_policy.json")
+}
+resource "aws_iam_role" "role_for_master" {
+  name = "role_master_kubernetes"
 
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+  tags = {
+    Name = var.tags_master_role
+  }
+}
+resource "aws_iam_role_policy_attachment" "kubernetes_master_policy_attachment" {
+  role       = aws_iam_role.role_for_master.name
+  policy_arn = aws_iam_policy.policy_for_master.arn
+}
+resource "aws_iam_instance_profile" "instance_profile_for_master" {
+  name = "instance_profile_for_master"
+  role = aws_iam_role.role_for_master.id
+}
